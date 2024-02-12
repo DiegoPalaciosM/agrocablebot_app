@@ -26,7 +26,10 @@ class SideMenu extends StatelessWidget {
       list.add(ListTile(
         tileColor: current == value[1] ? naranja : azul,
         leading: Icon(value[0], color: lTextColor),
-        title: Text(key),
+        title: Text(
+          key,
+          style: const TextStyle(color: lTextColor),
+        ),
         onTap: () {
           Navigator.pushReplacementNamed(context, value[1]);
         },

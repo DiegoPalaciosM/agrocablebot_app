@@ -86,21 +86,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
           deviceLogs(size, landscape: true),
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Center(
+                  child: Text(
+                    "Mover motores individualmente",
+                    style: TextStyle(
+                        color: gris, fontSize: size.longestSide * 0.025),
+                  ),
+                ),
+                infoWidget(size, landscape: true),
                 camerasWidget(size, landscape: true),
-                infoWidget(size, landscape: true)
               ],
             ),
           ),
         ],
       )),
       floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.menu),
-          onPressed: () {
-            setState(() {
+        child: const Icon(Icons.menu),
+        onPressed: () {
+          setState(
+            () {
               _scaffoldState.currentState!.openDrawer();
-            });
-          }),
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -118,11 +129,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             SizedBox(
               height: (size.height - appBarSize) * 0.6,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   deviceLogs(size),
                   camerasWidget(size, landscape: false),
                 ],
+              ),
+            ),
+            Center(
+              child: Text(
+                "Mover motores individualmente",
+                style:
+                    TextStyle(color: gris, fontSize: size.longestSide * 0.025),
               ),
             ),
             infoWidget(size)
@@ -205,6 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Comando',
                       ),
+                      style: const TextStyle(color: gris),
                     ),
                   ),
                 ),
@@ -285,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           Stack(alignment: AlignmentDirectional.center, children: [
             SizedBox(
-              height: landscape ? size.width * 0.25 : size.height * 0.2,
+              height: landscape ? size.width * 0.2 : size.height * 0.2,
               child: Mjpeg(
                 stream:
                     'http://${widget.configuration["ip"] ?? ""}:7001/aboveCam',
@@ -350,7 +368,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             alignment: AlignmentDirectional.center,
             children: [
               SizedBox(
-                height: landscape ? size.width * 0.25 : size.height * 0.2,
+                height: landscape ? size.width * 0.2 : size.height * 0.2,
                 child: Mjpeg(
                   stream:
                       'http://${widget.configuration["ip"] ?? ""}:7001/belowCam',
@@ -419,22 +437,119 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget infoWidget(Size size, {bool landscape = false}) {
-    const List<Widget> info = [
+    List<Widget> info = [
       Center(
-        child: Text('Info '),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_left),
+            ),
+            Text(
+              "Motor A",
+              style: TextStyle(
+                color: gris,
+                fontSize: responsiveSize(
+                    size, size.longestSide * 0.022, size.longestSide * 0.015),
+              ),
+            ),
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_right),
+            ),
+          ],
+        ),
       ),
       Center(
-        child: Text('Info 2'),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_left),
+            ),
+            Text(
+              "Motor B",
+              style: TextStyle(
+                color: gris,
+                fontSize: responsiveSize(
+                    size, size.longestSide * 0.022, size.longestSide * 0.015),
+              ),
+            ),
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_right),
+            ),
+          ],
+        ),
       ),
       Center(
-        child: Text('Info 3'),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_left),
+            ),
+            Text(
+              "Motor C",
+              style: TextStyle(
+                color: gris,
+                fontSize: responsiveSize(
+                    size, size.longestSide * 0.022, size.longestSide * 0.015),
+              ),
+            ),
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_right),
+            ),
+          ],
+        ),
       ),
       Center(
-        child: Text('Info 4'),
-      )
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_left),
+            ),
+            Text(
+              "Motor D",
+              style: TextStyle(
+                color: gris,
+                fontSize: responsiveSize(
+                    size, size.longestSide * 0.022, size.longestSide * 0.015),
+              ),
+            ),
+            IconButton(
+              iconSize:
+                  responsiveSize(size, size.width * 0.12, size.height * 0.1),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_right),
+            ),
+          ],
+        ),
+      ),
     ];
     return landscape
-        ? const Row(
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: info,
           )
@@ -442,7 +557,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             crossAxisCount: 2,
-            childAspectRatio: size.aspectRatio * 3.5,
+            childAspectRatio: size.aspectRatio * 3.8,
             children: info,
           );
   }

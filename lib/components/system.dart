@@ -31,7 +31,7 @@ final DateFormat formatterFiles = DateFormat('yyyyMMddhhmmss');
 class FileStorage {
   static Future<File> get _logFile async {
     final path = await getExternalStorageDirectory();
-    return File('${path!.path}/logs.log');
+    return File('${path!.path}/logs.log').create(recursive: true);
   }
 
   static Future<File> logToFileS(String log) async {

@@ -20,8 +20,8 @@ const lElevatedColor = amarillo;
 //const lFLoatingColor = Color(0xFF31BB94);
 const lFLoatingColor = verde;
 
-const mqttUser = 'imacuna';
-const mqttPassword = 'pi';
+const mqttUser = '';
+const mqttPassword = '';
 
 final Map<String, List<dynamic>> items = {
   'Acciones': [Icons.gamepad_outlined, '/actions'],

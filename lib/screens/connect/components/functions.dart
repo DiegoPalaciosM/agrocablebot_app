@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:network_info_plus/network_info_plus.dart';
@@ -12,9 +12,10 @@ class Functions {
     List<String> data = [];
     await NetworkInfo().getWifiIP().then((wifiip) async {
       if (wifiip == null) {
+        refresh('192.168.1.7');
         return;
       }
-      log(wifiip);
+      dev.log(wifiip);
       await NetworkInfo().getWifiGatewayIP().then((gatewayip) async {
         if (gatewayip == null) {
           return;

@@ -94,8 +94,8 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      floatingActionButtonTheme:
-          const FloatingActionButtonThemeData(backgroundColor: lFLoatingColor),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          shape: CircleBorder(), backgroundColor: lFLoatingColor),
       primaryColor: lPrimaryColor,
       scaffoldBackgroundColor: lBackgroundColor,
       textTheme: const TextTheme(
@@ -111,7 +111,11 @@ class _MyAppState extends State<MyApp> {
         labelLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
         labelMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
         labelSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
+        titleLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
+        titleMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
+        titleSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
       ),
+      //textTheme: TextTheme().apply(bodyColor: lTextColor)
     );
   }
 
@@ -146,7 +150,7 @@ class _MyAppState extends State<MyApp> {
     return OrientationBuilder(builder: (context, orientation) {
       changeRotation(orientation);
       return MaterialApp(
-        initialRoute: '/realtime',
+        initialRoute: '/charts',
         darkTheme: darkTheme(size: size),
         routes: {
           '/actions': (context) =>

@@ -15,8 +15,6 @@ import 'package:acb/components/system.dart';
 
 import 'package:acb/screens/charts/components/functions.dart';
 
-import 'dart:developer' as dev;
-
 class ChartsScreen extends StatefulWidget {
   const ChartsScreen({super.key, required this.configuration});
 
@@ -30,17 +28,16 @@ class _ChartsScreenState extends State<ChartsScreen> {
   late Functions functions;
 
   final GlobalKey chartKey = GlobalKey();
-  late List<dynamic> chartData;
+  late Map<String, dynamic> chartData;
+  late List<dynamic> createdAt;
+  List<String> keys = [];
   String dateInit = DateTime.now().toString().substring(0, 19);
   String dateEnd = DateTime.now().toString().substring(0, 19);
 
-  List<String> keys = [];
-  List<String> displayKeys = ['pitch', 'roll', 'yaw', 'x', 'y', 'z', 'value'];
-  List<String> currentLines = [];
   List<Color> colores = [gris, amarillo, naranja];
   List<String> sensores = [
     'Acelerometro',
-    'Magnetometro',
+    'Compass',
     'Giroscopio',
     'Humedad',
     'Presion',
@@ -62,27 +59,18 @@ class _ChartsScreenState extends State<ChartsScreen> {
   }
 
   void refresh(dynamic data) {
-    //dev.log(data.toString());
     setState(() {
       chartData = data;
-      if (chartData.isNotEmpty) {
-        keys = chartData[0].keys.toList();
-        List<String> temp = [];
-
-        for (var key in keys) {
-          if (displayKeys.contains(key)) {
-            temp.add(key);
-          }
-        }
-        currentLines = temp;
-      }
+      createdAt = chartData['createdAt'];
+      keys = chartData.keys.toList();
+      keys.removeWhere((element) => element == 'id' || element == 'createdAt');
     });
   }
 
   @override
   void initState() {
     super.initState();
-    chartData = [];
+    chartData = {};
     sensores.sort();
     dropDownValue = sensores[0].toLowerCase();
   }
@@ -124,7 +112,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
   Column landscapeLayout(Size size) {
     List<Widget> wList = [
       inputData(size),
-      //chart(size, 0.28),
+      chart(size, 0.28),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,13 +120,13 @@ class _ChartsScreenState extends State<ChartsScreen> {
     );
   }
 
-  // bool checkElement(index, value, def) {
-  //   try {
-  //     return keys.elementAt(index) == value;
-  //   } catch (_) {
-  //     return def;
-  //   }
-  // }
+  bool checkElement(index, value, def) {
+    try {
+      return keys.elementAt(index) == value;
+    } catch (_) {
+      return def;
+    }
+  }
 
   RepaintBoundary chart(Size size, double percent) {
     List<Widget> wList = [
@@ -146,15 +134,22 @@ class _ChartsScreenState extends State<ChartsScreen> {
           height: size.height * 0.1,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(currentLines.length, (index) {
-              return Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  child: Text(
-                    currentLines.elementAt(index),
-                    style: TextStyle(
-                        color: colores[index], fontSize: size.height * 0.04),
-                  ));
-            }),
+            children: List.generate(
+              keys.length,
+              (index) => Container(
+                margin: const EdgeInsets.only(right: 10),
+                child: chartData[keys.elementAt(0)].length > 1
+                    ? Text(
+                        keys.elementAt(index) == 'value'
+                            ? ''
+                            : keys.elementAt(index),
+                        style: TextStyle(
+                            color: colores[index],
+                            fontSize: size.height * 0.04),
+                      )
+                    : null,
+              ),
+            ),
           )),
       Container(
         height: size.height * percent,
@@ -344,7 +339,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
     List<Widget> buttonList = [];
     buttonList.add(ElevatedButton(
       onPressed: () {
-        dev.log('compelto');
         Functions.getData(
             refresh, widget.configuration["ip"] ?? '', dropDownValue);
       },
@@ -360,12 +354,12 @@ class _ChartsScreenState extends State<ChartsScreen> {
         child: const Text("Historial rango"),
       ),
     );
-    // checkElement(0, 'pitch', false)
-    //     ? buttonList.add(ElevatedButton(
-    //         onPressed: () {},
-    //         child: const Text("Cambiar Tipo de grafico"),
-    //       ))
-    //     : null;
+    checkElement(0, 'pitch', false)
+        ? buttonList.add(ElevatedButton(
+            onPressed: () {},
+            child: const Text("Cambiar Tipo de grafico"),
+          ))
+        : null;
     buttonList.add(ElevatedButton(
         onPressed: () {
           takePicture(chartKey);
@@ -379,34 +373,16 @@ class _ChartsScreenState extends State<ChartsScreen> {
 
   LineChartData lineChartData(Size size) {
     List<LineChartBarData> data = [];
-    for (var line in currentLines) {
-      List<dynamic> temp = [];
-      for (var d in chartData) {
-        temp.add(d[line]);
-      }
-      data.add(puntos(temp, colores[data.length]));
-      //data.add(puntos(chart))
+    for (var key in keys) {
+      data.add(puntos(chartData[key], colores[data.length]));
     }
     return LineChartData(
-        lineTouchData: lineTouchData(size),
+        lineTouchData: lineTouchData,
         gridData: const FlGridData(show: false),
         borderData: borderData,
         titlesData: titlesData1(size),
         lineBarsData: data);
   }
-
-  // LineChartData lineChartData(Size size) {
-  //   List<LineChartBarData> data = [];
-  //   for (var key in keys) {
-  //     data.add(puntos(chartData[key], colores[data.length]));
-  //   }
-  //   return LineChartData(
-  //       lineTouchData: lineTouchData,
-  //       gridData: const FlGridData(show: false),
-  //       borderData: borderData,
-  //       titlesData: titlesData1(size),
-  //       lineBarsData: data);
-  // }
 
   LineChartBarData puntos(List<dynamic> data, Color colorBar) {
     return LineChartBarData(
@@ -421,52 +397,25 @@ class _ChartsScreenState extends State<ChartsScreen> {
         }));
   }
 
-  LineTouchData lineTouchData(Size size) => LineTouchData(
+  LineTouchData get lineTouchData => LineTouchData(
         handleBuiltInTouches: true,
         touchTooltipData: LineTouchTooltipData(
-            fitInsideHorizontally: true,
-            tooltipMargin: size.height * 0.1,
-            maxContentWidth: size.width * 0.4,
-            tooltipBgColor: azul.withOpacity(0.8),
+            tooltipBgColor: gris.withOpacity(0.3),
             getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
               return touchedBarSpots.map((barSpot) {
                 return LineTooltipItem('', const TextStyle(), children: [
                   TextSpan(
                     text:
-                        '${currentLines.elementAt(barSpot.barIndex)}: ${barSpot.y.roundDecimals(3)}\n',
-                    style: TextStyle(
-                      color: colores[barSpot.barIndex],
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 1.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                    ),
+                        '${keys.elementAt(barSpot.barIndex)}: ${barSpot.y.roundDecimals(3)}\n',
+                    style: TextStyle(color: colores[barSpot.barIndex]),
                   ),
                   TextSpan(
-                    text: '${chartData[barSpot.spotIndex]['fecha_creacion']}\n',
-                    style: TextStyle(
-                      color: colores[barSpot.barIndex],
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 1.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                    ),
+                    text: '${createdAt[barSpot.spotIndex]}\n',
+                    style: TextStyle(color: colores[barSpot.barIndex]),
                   ),
                   TextSpan(
-                    text: '${barSpot.spotIndex}',
-                    style: TextStyle(
-                      color: colores[barSpot.barIndex],
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 1.0,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ],
-                    ),
+                    text: '${barSpot.barIndex}',
+                    style: TextStyle(color: colores[barSpot.barIndex]),
                   )
                 ]);
               }).toList();

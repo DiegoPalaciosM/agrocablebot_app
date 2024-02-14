@@ -193,8 +193,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 IconButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/connect');
-                      //FileStorage.clearLogs();
-                      //setUpLogs();
                     },
                     icon: const Icon(Icons.link))
               ],
@@ -228,16 +226,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 IconButton(
                     onPressed: () async {
-                      log(FileStorage.logToFileS(commandField.text).toString());
+                      if (commandField.text.isNotEmpty) {
+                        log(FileStorage.logToFileS(commandField.text).toString());
                       widget.mqtt.publish(
                           'comandos', '{"GCODE":"${commandField.text}"}');
                       setState(() {
                         logs.add(commandField.text);
                       });
-                      //setUpLogs();
                       commandField.text = '';
+                      }
                     },
-                    icon: const Icon(Icons.send))
+                    icon: const Icon(Icons.send),)
               ],
             ),
           ),
@@ -258,17 +257,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       });
                     },
                     onTap: () {
-                      //FileStorage.logToFileS(
-                      //   '[${formatter.format(DateTime.now())}] ${logs[index].split('] ')[1]}');
-                      //widget.mqtt.publish('comandos',
-                      //    '{"GCODE":"${logs[index].split('] ')[1]}"}');
                       FileStorage.logToFileS(logs[index]);
                       widget.mqtt
                           .publish('comandos', '{"GCODE":"${logs[index]}"}');
                       setState(() {
                         logs.add(logs[index]);
                       });
-                      //setUpLogs();
                     },
                     child: Container(
                       margin: EdgeInsets.only(
@@ -349,7 +343,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.photo),
-                onPressed: () {},
+                onPressed: () {
+
+                },
               )
             ],
           ),
@@ -445,8 +441,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_left),
+              onPressed: () {
+                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 A-1"}');
+              },
+              icon: const Icon(Icons.remove),
             ),
             Text(
               "Motor A",
@@ -459,8 +458,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_right),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 A1"}');
+              },
+              icon: const Icon(Icons.add),
             ),
           ],
         ),
@@ -472,8 +474,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_left),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 B-1"}');
+              },
+              icon: const Icon(Icons.remove),
             ),
             Text(
               "Motor B",
@@ -486,8 +491,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_right),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 B1"}');
+              },
+              icon: const Icon(Icons.add),
             ),
           ],
         ),
@@ -499,8 +507,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_left),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 C-1"}');
+              },
+              icon: const Icon(Icons.remove),
             ),
             Text(
               "Motor C",
@@ -513,8 +524,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_right),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 C1"}');
+              },
+              icon: const Icon(Icons.add),
             ),
           ],
         ),
@@ -526,8 +540,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_left),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 D-1"}');
+              },
+              icon: const Icon(Icons.remove),
             ),
             Text(
               "Motor D",
@@ -540,8 +557,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             IconButton(
               iconSize:
                   responsiveSize(size, size.width * 0.12, size.height * 0.1),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_arrow_right),
+              onPressed: () {
+                                widget.mqtt
+                          .publish('comandos', '{"GCODE":"G10 D1"}');
+              },
+              icon: const Icon(Icons.add),
             ),
           ],
         ),

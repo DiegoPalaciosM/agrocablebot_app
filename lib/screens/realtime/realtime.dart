@@ -53,7 +53,7 @@ class _RealTimeScreenState extends State<RealTimeScreen> {
                       '$key1:  $value1'.capitalize(),
                       style: TextStyle(
                           fontSize: responsiveSize(
-                              size, size.height * 0.015, size.width * 0.02)),
+                              size, size.height * 0.015, size.width * 0.02),color: lTextColor),
                     ),
                   )
                 ],

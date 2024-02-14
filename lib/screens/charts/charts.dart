@@ -62,7 +62,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
   }
 
   void refresh(dynamic data) {
-    //dev.log(data.toString());
     setState(() {
       chartData = data;
       if (chartData.isNotEmpty) {
@@ -124,21 +123,12 @@ class _ChartsScreenState extends State<ChartsScreen> {
   Column landscapeLayout(Size size) {
     List<Widget> wList = [
       inputData(size),
-      //chart(size, 0.28),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: wList,
     );
   }
-
-  // bool checkElement(index, value, def) {
-  //   try {
-  //     return keys.elementAt(index) == value;
-  //   } catch (_) {
-  //     return def;
-  //   }
-  // }
 
   RepaintBoundary chart(Size size, double percent) {
     List<Widget> wList = [
@@ -263,6 +253,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
                   IconButton(
                     onPressed: () async {
                       DateTime? date = await showOmniDateTimePicker(
+                        theme: ThemeData.light(),
                           context: context,
                           isShowSeconds: true,
                           initialDate: DateTime.parse(dateInit));
@@ -310,6 +301,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
                   IconButton(
                     onPressed: () async {
                       DateTime? date = await showOmniDateTimePicker(
+                        theme: ThemeData.light(),
                           context: context,
                           isShowSeconds: true,
                           initialDate: DateTime.parse(dateInit));
@@ -360,12 +352,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
         child: const Text("Historial rango"),
       ),
     );
-    // checkElement(0, 'pitch', false)
-    //     ? buttonList.add(ElevatedButton(
-    //         onPressed: () {},
-    //         child: const Text("Cambiar Tipo de grafico"),
-    //       ))
-    //     : null;
     buttonList.add(ElevatedButton(
         onPressed: () {
           takePicture(chartKey);
@@ -385,7 +371,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
         temp.add(d[line]);
       }
       data.add(puntos(temp, colores[data.length]));
-      //data.add(puntos(chart))
     }
     return LineChartData(
         lineTouchData: lineTouchData(size),
@@ -394,19 +379,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
         titlesData: titlesData1(size),
         lineBarsData: data);
   }
-
-  // LineChartData lineChartData(Size size) {
-  //   List<LineChartBarData> data = [];
-  //   for (var key in keys) {
-  //     data.add(puntos(chartData[key], colores[data.length]));
-  //   }
-  //   return LineChartData(
-  //       lineTouchData: lineTouchData,
-  //       gridData: const FlGridData(show: false),
-  //       borderData: borderData,
-  //       titlesData: titlesData1(size),
-  //       lineBarsData: data);
-  // }
 
   LineChartBarData puntos(List<dynamic> data, Color colorBar) {
     return LineChartBarData(

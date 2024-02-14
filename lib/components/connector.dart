@@ -72,17 +72,10 @@ class MQTT {
     final pt =
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
     Map<String, dynamic> aux = jsonDecode(pt);
-    // if (c[0].topic == 'status') {
-    //   if (aux.containsKey("esp")) {
-    //     if (aux["esp"] == "OK") {
-    //       moving = false;
-    //     }
-    //   }
-    // } else {
+   
     try {
       refresh(c[0].topic, aux);
     } catch (_) {}
-    //  }
   }
 
   _buildMessage(message) {
@@ -92,7 +85,7 @@ class MQTT {
   }
 
   void publish(topic, message) {
-    if (connected) {
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
       client.publishMessage(topic, MqttQos.exactlyOnce, _buildMessage(message));
     }
   }

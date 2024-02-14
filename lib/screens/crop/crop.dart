@@ -30,11 +30,8 @@ class _CropScreenState extends State<CropScreen> {
               title: 'Cultivo'),
           const Expanded(
             child: SingleChildScrollView(
-              child: Column(
-                children: [],
               ),
             ),
-          )
         ],
       ),
       drawer: SideMenu(current: ModalRoute.of(context)!.settings.name),

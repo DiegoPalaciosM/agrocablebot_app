@@ -82,13 +82,7 @@ class FileStorage {
   }
 
   static Future<void> checkPermission() async {
-    //var status = await Permission.storage.status;
     var status1 = await Permission.manageExternalStorage.status;
-    //if (!status.isGranted) {
-    //log(status.isGranted.toString());
-    //await Permission.storage.request();
-    //log('status');
-    //}
     if (!status1.isGranted) {
       log(status1.isGranted.toString());
       await Permission.manageExternalStorage.request();

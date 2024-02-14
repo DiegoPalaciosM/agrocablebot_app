@@ -113,9 +113,8 @@ class _MyAppState extends State<MyApp> {
         labelSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
         titleLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
         titleMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        titleSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
+        titleSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'), 
       ),
-      //textTheme: TextTheme().apply(bodyColor: lTextColor)
     );
   }
 
@@ -150,7 +149,7 @@ class _MyAppState extends State<MyApp> {
     return OrientationBuilder(builder: (context, orientation) {
       changeRotation(orientation);
       return MaterialApp(
-        initialRoute: '/charts',
+        initialRoute: '/realtime',
         darkTheme: darkTheme(size: size),
         routes: {
           '/actions': (context) =>

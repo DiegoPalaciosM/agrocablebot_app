@@ -28,9 +28,6 @@ class _ActionsScreenState extends State<ActionsScreen> {
   late Orientation orientation;
 
   refresh(String topic, Map<dynamic, dynamic> payload) {
-    // if (!(topic == 'comandos')) {
-    //   return 0;
-    // }
     setState(() {
       selected = getSelected(payload);
       Z = payload['z'];
@@ -109,7 +106,6 @@ class _ActionsScreenState extends State<ActionsScreen> {
                         backgroundColor: gris.withOpacity(0.8),
                         dismissDirection: DismissDirection.none,
                         duration: const Duration(seconds: 1, milliseconds: 100),
-                        //width: size.width * 0.1,
                         margin: EdgeInsets.only(
                             left: details.globalPosition.dx + size.width * 0.03,
                             right: size.width -
@@ -185,7 +181,6 @@ class _ActionsScreenState extends State<ActionsScreen> {
                         backgroundColor: gris.withOpacity(0.8),
                         dismissDirection: DismissDirection.none,
                         duration: const Duration(seconds: 1, milliseconds: 100),
-                        //width: size.width * 0.1,
                         margin: EdgeInsets.only(
                             left: details.globalPosition.dx < size.width / 2
                                 ? details.globalPosition.dx + size.width * 0.03
@@ -213,10 +208,6 @@ class _ActionsScreenState extends State<ActionsScreen> {
                   },
                   child: SizedBox(
                     child: Center(
-                      // child: Text(
-                      //   '${getIndex(matriz, index, count: seedersNumber)}',
-                      //   style: TextStyle(color: selected == index ? verde : gris),
-                      // ),
                       child: SimpleShadow(
                         opacity: selected == index ? 1 : 0.6,
                         color: selected == index ? amarillo : gris,
@@ -288,10 +279,10 @@ class _ActionsScreenState extends State<ActionsScreen> {
     return SizedBox(
         width: orientation == Orientation.landscape
             ? size.width * 0.3
-            : size.width * 0.9, //size.width * 0.35,
+            : size.width * 0.9,
         height: orientation == Orientation.landscape
             ? size.height * 0.25
-            : size.height * 0.1, // size.height * 0.25,
+            : size.height * 0.1, 
         child: Center(
           child: GridView.count(
             shrinkWrap: true,
@@ -307,8 +298,6 @@ class _ActionsScreenState extends State<ActionsScreen> {
             childAspectRatio: orientation == Orientation.landscape
                 ? size.aspectRatio * sqrt(buttons.length - 1).ceil()
                 : size.aspectRatio * 10,
-            //sqrt(buttons.length - 1).ceil().toDouble() * (1 / size.aspectRatio) + buttons.length,
-            //buttons.length / (size.aspectRatio / sqrt(buttons.length - 1).ceil()),
             children: buttons,
           ),
         ));
@@ -359,7 +348,6 @@ class _ActionsScreenState extends State<ActionsScreen> {
                     onPressed: () {
                       setState(() {
                         selected = 40;
-                        //widget.mqtt.publish('comandos', '{"GCODE":"G28"}');
                         sendG1();
                       });
                     },

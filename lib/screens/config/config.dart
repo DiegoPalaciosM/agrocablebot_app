@@ -59,6 +59,8 @@ class _ConfigScreenState extends State<ConfigScreen> {
             children: [
               configItem(
                   context, size, 'Actualizar sensores', '5', 'realtimeDelay'),
+              configItem(
+                  context, size, 'Nombre del servidor de Tailscale', '', 'tailscale'),
               imagePlantasConfig(
                   context,
                   size,
@@ -203,11 +205,10 @@ class _ConfigScreenState extends State<ConfigScreen> {
                 ],
                 content: TextFormField(
                   controller: inputConfigController,
-                  keyboardType: TextInputType.number,
                   style: TextStyle(
                       fontFamily: "Roboto",
                       fontSize: responsiveSize(
-                          size, size.height * 0.02, size.width * 0.02)),
+                          size, size.height * 0.02, size.width * 0.02), color: gris),
                   textAlign: TextAlign.center,
                 ),
               );

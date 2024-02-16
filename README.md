@@ -35,9 +35,3 @@ Tools > Flutter > Flutter Pub Get
 ``
 Build > Flutter > Build APK
 ``
-## Posibles Errores
-```
-Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is x.x.x, expected version is x.x.x
-```
-
-

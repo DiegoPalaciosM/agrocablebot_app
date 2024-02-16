@@ -1,17 +1,8 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="agro.cable.bot">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
-   <application
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
         android:label="AgroCableBot"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
-        android:allowBackup="false"
-        android:fullBackupOnly="false"
-        android:requestLegacyExternalStorage="true"
         <activity
             android:name=".MainActivity"
             android:exported="true"

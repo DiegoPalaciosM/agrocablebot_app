@@ -5,30 +5,30 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.19.5 <3.0.0'
+  sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  network_info_plus: ^3.0.2
-  mqtt_client: ^9.8.1
+  network_info_plus: ^4.1.0+1
+  mqtt_client: ^10.1.0
   sqflite: ^2.2.8+4
   http: ^0.13.6
-  fl_chart: ^0.63.0
+  fl_chart: ^0.66.2
   flutter_mjpeg: ^2.0.4
   omni_datetime_picker: ^1.0.8
   flutter_logs: ^2.1.10
   path_provider: ^2.1.0
-  permission_handler: ^10.4.3
+  permission_handler: ^11.3.0
   path: ^1.8.3
-  intl: ^0.18.1
+  intl: ^0.19.0
   simple_shadow: ^0.3.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
   baseflow_plugin_template: ^2.1.2
   change_app_package_name: ^1.1.0
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
   flutter_launcher_icons: "^0.13.1"
 flutter:
   uses-material-design: true

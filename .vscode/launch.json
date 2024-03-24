@@ -1,0 +1,61 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "agrocablebot",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "agrocablebot (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "agrocablebot (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "agrocablebot (Android)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "deviceId": "TFY LX3"
+        },
+        {
+            "name": "agrocablebot (Linux)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "deviceId": "Linux"
+        },
+        {
+            "name": "agrocablebotA (Android)",
+            "request": "attach",
+            "type": "dart",
+            "deviceId": "TFY LX3"
+        },
+        {
+            "name": "agrocablebotA (Linux)",
+            "request": "attach",
+            "type": "dart",
+            "deviceId": "Linux"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "agrocablebot (Linux & Android)",
+            "configurations": ["agrocablebot (Linux)", "agrocablebot (Android)"]
+        },
+        {
+            "name": "agrocablebotA (Linux & Android)",
+            "configurations": ["agrocablebotA (Linux)", "agrocablebotA (Android)"]
+        }
+    ]
+}

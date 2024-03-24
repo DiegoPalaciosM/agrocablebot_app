@@ -1,43 +1,99 @@
-name: acb
+name: agrocablebot
 description: Aplicación para comandar el robot AgroCableBot.
-publish_to: 'none'
-
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.3 <4.0.0'
+  sdk: ">=3.2.6 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  network_info_plus: ^4.1.0+1
-  mqtt_client: ^10.1.0
-  sqflite: ^2.2.8+4
-  http: ^0.13.6
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  mqtt_client: ^10.2.0
+  flutter_screenutil: ^5.9.0
+  shared_preferences: ^2.2.2
+  http: ^1.2.0
   fl_chart: ^0.66.2
-  flutter_mjpeg: ^2.0.4
-  omni_datetime_picker: ^1.0.8
-  flutter_logs: ^2.1.10
-  path_provider: ^2.1.0
   permission_handler: ^11.3.0
-  path: ^1.8.3
-  intl: ^0.19.0
-  simple_shadow: ^0.3.1
+  path_provider: ^2.1.2
+  omni_datetime_picker: ^1.0.9
+
+dependency_overrides:
+  # Overriding this because there has not been a new release with the
+  # bump of http to > 1.0.0 instead of ^0.13.0.
+  flutter_mjpeg:
+    git:
+      url: https://github.com/mylisabox/flutter_mjpeg
+      ref: e8cbafc08f9c81a71df6ac584e731d04cc742ec4
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  baseflow_plugin_template: ^2.1.2
-  change_app_package_name: ^1.1.0
-  flutter_lints: ^3.0.1
+  flutter_lints: ^2.0.0
   flutter_launcher_icons: "^0.13.1"
+
 flutter:
+  generate: true
   uses-material-design: true
+
   assets:
     - assets/images/
     - assets/images/plantas/
-    - assets/appainter_theme.json
 
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat/Montserrat-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Montserrat/Montserrat-ThinItalic.ttf
+          style: italic
+          weight: 100
+        - asset: assets/fonts/Montserrat/Montserrat-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Montserrat/Montserrat-ExtraLightItalic.ttf
+          style: italic
+          weight: 200
+        - asset: assets/fonts/Montserrat/Montserrat-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Montserrat/Montserrat-LightItalic.ttf
+          style: italic
+          weight: 300
+        - asset: assets/fonts/Montserrat/Montserrat-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Montserrat/Montserrat-Italic.ttf
+          style: italic
+          weight: 400
+        - asset: assets/fonts/Montserrat/Montserrat-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Montserrat/Montserrat-MediumItalic.ttf
+          style: italic
+          weight: 500
+        - asset: assets/fonts/Montserrat/Montserrat-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Montserrat/Montserrat-SemiBoldItalic.ttf
+          style: italic
+          weight: 600
+        - asset: assets/fonts/Montserrat/Montserrat-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Montserrat/Montserrat-BoldItalic.ttf
+          style: italic
+          weight: 700
+        - asset: assets/fonts/Montserrat/Montserrat-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Montserrat/Montserrat-ExtraBoldItalic.ttf
+          style: italic
+          weight: 800
+        - asset: assets/fonts/Montserrat/Montserrat-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Montserrat/Montserrat-BlackItalic.ttf
+          style: italic
+          weight: 900
+
+# flutter pub run flutter_launcher_icons:main
 flutter_launcher_icons:
   android: "launcher_icon"
   image_path: "assets/images/logo.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptative_icon_background: "#ffffff"

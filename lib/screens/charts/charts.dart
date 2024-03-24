@@ -1,156 +1,390 @@
-import 'dart:async';
+// Dependencias de flutter
+import 'dart:convert';
+// ignore: unused_import
+import 'dart:developer' as dev;
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:http/http.dart' as http;
 
+// Dependencias externas
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 
-import 'package:acb/components/constants.dart';
-import 'package:acb/components/header.dart';
-import 'package:acb/components/menu.dart';
-import 'package:acb/components/system.dart';
+// Otros archivo de codigo
+// -- Modulos
+import 'package:agrocablebot/modules/constants/constants.dart';
+import 'package:agrocablebot/modules/components/components.dart';
+import 'package:agrocablebot/modules/connector/connector.dart';
+import 'package:agrocablebot/modules/system/system.dart';
 
-import 'package:acb/screens/charts/components/functions.dart';
-
-import 'dart:developer' as dev;
-
-class ChartsScreen extends StatefulWidget {
-  const ChartsScreen({super.key, required this.configuration});
-
-  final Map<String, String> configuration;
+class ChartScreen extends StatefulWidget {
+  const ChartScreen({super.key});
 
   @override
-  State<ChartsScreen> createState() => _ChartsScreenState();
+  State<ChartScreen> createState() => _ChartScreenState();
 }
 
-class _ChartsScreenState extends State<ChartsScreen> {
-  late Functions functions;
+class _ChartScreenState extends State<ChartScreen> {
+  late BuildContext globalContext;
+  late Size size;
+
+  bool initDateState = false;
+  String initDatetime = DateTime.now().toString().substring(0, 19);
+  String dateInit = '0001-01-01 00:00:00';
+  bool endDateState = false;
+  String endDatetime =
+      DateTime.now().add(const Duration(hours: 1)).toString().substring(0, 19);
+  String dateEnd = '9999-12-31 23:59:59';
 
   final GlobalKey chartKey = GlobalKey();
   late List<dynamic> chartData;
-  String dateInit = DateTime.now().toString().substring(0, 19);
-  String dateEnd = DateTime.now().toString().substring(0, 19);
-
   List<String> keys = [];
   List<String> displayKeys = ['pitch', 'roll', 'yaw', 'x', 'y', 'z', 'value'];
   List<String> currentLines = [];
   List<Color> colores = [gris, amarillo, naranja];
+
   List<String> sensores = [
-    'Acelerometro',
-    'Magnetometro',
-    'Giroscopio',
-    'Humedad',
-    'Presion',
-    'Temperatura'
+    "Acelerometro",
+    "Giroscopio",
+    "Magnetometro",
+    "Orientacion",
+    "Humedad",
+    "Presion",
+    "Temperatura"
   ];
-  late String dropDownValue;
+  late String sensorValue;
 
-  double minY = 0;
-  double maxY = 0;
-
-  Future<void> takePicture(key) async {
+  exportImage() async {
     RenderRepaintBoundary? boundary =
-        key.currentContext?.findRenderObject() as RenderRepaintBoundary;
-    ui.Image? image = await boundary.toImage(pixelRatio: 1);
+        chartKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+    ui.Image? image = await boundary.toImage(pixelRatio: 10);
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List? pngBytes = byteData?.buffer.asUint8List();
-    FileStorage.saveImage(pngBytes,
-        '$dropDownValue-${formatterFiles.format(DateTime.now())}.png');
+    saveImage(
+        pngBytes, '$sensorValue-${formatterFiles.format(DateTime.now())}.png');
   }
 
-  void refresh(dynamic data) {
-    setState(() {
-      chartData = data;
-      if (chartData.isNotEmpty) {
-        keys = chartData[0].keys.toList();
-        List<String> temp = [];
+  getData() {
+    http
+        .post(Uri.parse('http://${Configuration.ip}:7001/data/$sensorValue'),
+            headers: {'Content-Type': 'application/json; charset=UTF-8'},
+            body: jsonEncode({
+              'dateInit': initDateState ? initDatetime : dateInit,
+              'dateEnd': endDateState ? endDatetime : dateEnd
+            }))
+        .then(
+      (response) {
+        if (response.statusCode == 200) {
+          setState(() {
+            chartData = jsonDecode(response.body);
+            if (chartData.isNotEmpty) {
+              keys = chartData[0].keys.toList();
+              List<String> temp = [];
 
-        for (var key in keys) {
-          if (displayKeys.contains(key)) {
-            temp.add(key);
-          }
+              for (var key in keys) {
+                if (displayKeys.contains(key)) {
+                  temp.add(key);
+                }
+              }
+              currentLines = temp;
+            }
+          });
         }
-        currentLines = temp;
-      }
-    });
+      },
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    chartData = [];
-    sensores.sort();
-    dropDownValue = sensores[0].toLowerCase();
+    sensorValue = sensores[0].toLowerCase();
   }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    Orientation orientation = MediaQuery.of(context).orientation;
+    globalContext = context;
+    size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Column(
+      appBar: Header(
+          preferredSize: Size(600.w, 160.h),
+          child: Text(AppLocalizations.of(context)!.charts)),
+      body: Center(
+        child: portraitLayout(),
+      ),
+      drawer: const SideMenu(),
+    );
+  }
+
+  portraitLayout() => Column(
+        children: [inputData(), chart(), actionButtons()],
+      );
+
+  inputData() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Header(
-              ip: widget.configuration["ip"],
-              name: widget.configuration["name"],
-              size: size,
-              title: 'Graficos'),
-          orientation == Orientation.landscape
-              ? landscapeLayout(size)
-              : portraitLayout(size),
-          buttons()
+          Container(
+            height: 45.h,
+            margin: EdgeInsets.only(left: 20.w, right: 20.w, top: 20.h),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: naranja, width: 2.h),
+              ),
+            ),
+            child: FittedBox(
+              child: Text(
+                AppLocalizations.of(globalContext)!.sensor,
+                style: TextStyle(
+                  color: gris,
+                  fontSize: 100.sp,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 30.w, vertical: 5.h),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton(
+                value: sensorValue,
+                items: sensores.map(
+                  (String sensor) {
+                    return DropdownMenuItem(
+                      value: sensor.toLowerCase(),
+                      child: SizedBox(
+                        height: 33.h,
+                        child: FittedBox(
+                          child: Text(
+                            sensor,
+                            style: TextStyle(color: gris, fontSize: 250.sp),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    sensorValue = value ?? sensorValue;
+                  });
+                },
+              ),
+            ),
+          ),
+          Container(
+            height: 45.h,
+            margin: EdgeInsets.symmetric(horizontal: 20.w),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: naranja, width: 2.h),
+              ),
+            ),
+            child: FittedBox(
+              child: Text(
+                AppLocalizations.of(globalContext)!.range,
+                style: TextStyle(
+                  color: gris,
+                  fontSize: 100.sp,
+                ),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Row(
+                children: [
+                  Checkbox(
+                    checkColor: Colors.white,
+                    value: initDateState,
+                    onChanged: (bool? value) {
+                      showOmniDateTimePicker(
+                              context: context,
+                              theme: ThemeData.light(),
+                              isShowSeconds: true)
+                          .then((datetime) {
+                        setState(() {
+                          initDateState = value!;
+                          initDatetime = datetime.toString().substring(0, 19);
+                        });
+                      });
+                    },
+                  ),
+                  SizedBox(
+                    height: 35.h,
+                    child: FittedBox(
+                      child: Text(
+                        AppLocalizations.of(globalContext)!.start,
+                        style: TextStyle(color: gris, fontSize: 100.sp),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      DateTime? date = await showOmniDateTimePicker(
+                          context: context,
+                          theme: ThemeData.light(),
+                          isShowSeconds: true,
+                          initialDate: DateTime.parse(initDatetime));
+                      setState(() {
+                        initDatetime =
+                            date?.toString().substring(0, 19) ?? initDatetime;
+                      });
+                    },
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.change_circle),
+                  ),
+                  SizedBox(
+                    height: 35.h,
+                    child: FittedBox(
+                      child: Text(initDatetime,
+                          style: const TextStyle(color: gris)),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Row(
+                children: [
+                  Checkbox(
+                    checkColor: Colors.white,
+                    value: endDateState,
+                    onChanged: (bool? value) {
+                      showOmniDateTimePicker(
+                              context: context,
+                              theme: ThemeData.light(),
+                              isShowSeconds: true)
+                          .then((datetime) {
+                        setState(() {
+                          endDateState = value!;
+                        });
+                      });
+                    },
+                  ),
+                  SizedBox(
+                    height: 35.h,
+                    child: FittedBox(
+                      child: Text(
+                        AppLocalizations.of(globalContext)!.end,
+                        style: TextStyle(color: gris, fontSize: 100.sp),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      DateTime? date = await showOmniDateTimePicker(
+                          context: context,
+                          theme: ThemeData.light(),
+                          isShowSeconds: true,
+                          initialDate: DateTime.parse(endDatetime));
+                      setState(() {
+                        endDatetime =
+                            date?.toString().substring(0, 19) ?? endDatetime;
+                      });
+                    },
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.change_circle),
+                  ),
+                  SizedBox(
+                    height: 35.h,
+                    child: FittedBox(
+                      child: Text(endDatetime,
+                          style: const TextStyle(color: gris)),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          )
         ],
+      );
+
+  actionButtons() {
+    final buttons = [
+      actionButton(
+        AppLocalizations.of(globalContext)!.draw,
+        () {
+          getData();
+        },
       ),
-      drawer: SideMenu(current: ModalRoute.of(context)!.settings.name),
-    );
-  }
-
-  Column portraitLayout(Size size) {
-    List<Widget> wList = [
-      inputData(size),
-      chart(size, 0.35),
+      actionButton(
+        AppLocalizations.of(globalContext)!.save,
+        () {
+          exportImage();
+        },
+      ),
     ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: wList,
+    return Container(
+      padding: EdgeInsets.only(
+        left: 20.w,
+        right: 20.w,
+      ),
+      margin: EdgeInsets.only(
+        top: 5.h,
+        bottom: 5.h,
+      ),
+      height: 110.h,
+      child: Center(
+        child: GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          padding: EdgeInsets.zero,
+          crossAxisCount: math.sqrt(buttons.length).ceil(),
+          childAspectRatio: 7.sp,
+          children: buttons,
+        ),
+      ),
     );
   }
 
-  Column landscapeLayout(Size size) {
-    List<Widget> wList = [
-      inputData(size),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: wList,
-    );
-  }
-
-  RepaintBoundary chart(Size size, double percent) {
+  RepaintBoundary chart() {
     List<Widget> wList = [
       SizedBox(
-          height: size.height * 0.1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(currentLines.length, (index) {
+        height: 100.h,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            currentLines.length,
+            (index) {
               return Container(
-                  margin: const EdgeInsets.only(right: 10),
+                height: 50.h,
+                margin: const EdgeInsets.only(right: 10),
+                child: FittedBox(
                   child: Text(
                     currentLines.elementAt(index),
                     style: TextStyle(
-                        color: colores[index], fontSize: size.height * 0.04),
-                  ));
-            }),
-          )),
+                      color: colores[index],
+                      fontSize: 100.sp,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
       Container(
-        height: size.height * percent,
-        padding: const EdgeInsets.only(right: 20),
+        height: size.aspectRatio < 0.5 ? 320.h : 390.h,
+        margin: EdgeInsets.only(right: 10.w, left: 10.w),
         child: LineChart(
-          lineChartData(size),
+          lineChartData(),
         ),
       )
     ];
@@ -162,208 +396,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
     );
   }
 
-  Column inputData(Size size) {
-    List<Widget> wList = [
-      Container(
-        margin: EdgeInsets.only(
-            top: size.longestSide * 0.015, left: size.longestSide * 0.01),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              width: size.longestSide * 0.0025,
-              color: naranja,
-            ),
-          ),
-        ),
-        child: Text(
-          'Sensor',
-          style: TextStyle(
-            fontSize: size.longestSide * 0.03,
-            color: gris,
-          ),
-        ),
-      ),
-      Container(
-        margin: EdgeInsets.only(
-            top: size.longestSide * 0.005, left: size.longestSide * 0.015),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton(
-            value: dropDownValue,
-            items: sensores.map((String sensor) {
-              return DropdownMenuItem(
-                  value: sensor.toLowerCase(),
-                  child: Text(
-                    sensor,
-                    style: TextStyle(
-                      fontSize: size.longestSide * 0.02,
-                      color: gris,
-                    ),
-                  ));
-            }).toList(),
-            onChanged: (selected) {
-              setState(() {
-                dropDownValue = selected!;
-              });
-            },
-          ),
-        ),
-      ),
-      Container(
-        margin: EdgeInsets.only(
-            top: size.longestSide * 0.005, left: size.longestSide * 0.01),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              width: size.longestSide * 0.0025,
-              color: naranja,
-            ),
-          ),
-        ),
-        child: Text(
-          'Rango',
-          style: TextStyle(
-            fontSize: size.longestSide * 0.03,
-            color: gris,
-          ),
-        ),
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Column(
-            children: [
-              Container(
-                margin: EdgeInsets.only(top: size.longestSide * 0.005),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                        width: size.longestSide * 0.001, color: naranja),
-                  ),
-                ),
-                child: Text(
-                  'Inicio',
-                  style: TextStyle(
-                    fontSize: size.longestSide * 0.025,
-                    color: gris,
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      DateTime? date = await showOmniDateTimePicker(
-                        theme: ThemeData.light(),
-                          context: context,
-                          isShowSeconds: true,
-                          initialDate: DateTime.parse(dateInit));
-                      setState(() {
-                        dateInit =
-                            date?.toString().substring(0, 19) ?? dateInit;
-                      });
-                    },
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.change_circle),
-                  ),
-                  Text(
-                    dateInit,
-                    style: TextStyle(
-                      fontSize: size.longestSide * 0.02,
-                      color: gris,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              Container(
-                margin: EdgeInsets.only(
-                    left: size.longestSide * 0.05,
-                    top: size.longestSide * 0.005),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                        width: size.longestSide * 0.001, color: naranja),
-                  ),
-                ),
-                child: Text(
-                  'Final',
-                  style: TextStyle(
-                    fontSize: size.longestSide * 0.025,
-                    color: gris,
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      DateTime? date = await showOmniDateTimePicker(
-                        theme: ThemeData.light(),
-                          context: context,
-                          isShowSeconds: true,
-                          initialDate: DateTime.parse(dateInit));
-                      setState(() {
-                        dateEnd = date?.toString().substring(0, 19) ?? dateEnd;
-                      });
-                    },
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.change_circle),
-                  ),
-                  Text(
-                    dateEnd,
-                    style: TextStyle(
-                      fontSize: size.longestSide * 0.02,
-                      color: gris,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: wList,
-    );
-  }
-
-  Row buttons() {
-    List<Widget> buttonList = [];
-    buttonList.add(ElevatedButton(
-      onPressed: () {
-        dev.log('compelto');
-        Functions.getData(
-            refresh, widget.configuration["ip"] ?? '', dropDownValue);
-      },
-      child: const Text("Historial completo"),
-    ));
-    buttonList.add(
-      ElevatedButton(
-        onPressed: () {
-          Functions.getData(
-              refresh, widget.configuration["ip"] ?? '', dropDownValue,
-              dateInit: dateInit, dateEnd: dateEnd);
-        },
-        child: const Text("Historial rango"),
-      ),
-    );
-    buttonList.add(ElevatedButton(
-        onPressed: () {
-          takePicture(chartKey);
-        },
-        child: const Text("Guardar Captura")));
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: buttonList,
-    );
-  }
-
-  LineChartData lineChartData(Size size) {
+  LineChartData lineChartData() {
     List<LineChartBarData> data = [];
     for (var line in currentLines) {
       List<dynamic> temp = [];
@@ -373,10 +406,10 @@ class _ChartsScreenState extends State<ChartsScreen> {
       data.add(puntos(temp, colores[data.length]));
     }
     return LineChartData(
-        lineTouchData: lineTouchData(size),
+        lineTouchData: lineTouchData(),
         gridData: const FlGridData(show: false),
         borderData: borderData,
-        titlesData: titlesData1(size),
+        titlesData: titlesData1(),
         lineBarsData: data);
   }
 
@@ -393,12 +426,12 @@ class _ChartsScreenState extends State<ChartsScreen> {
         }));
   }
 
-  LineTouchData lineTouchData(Size size) => LineTouchData(
+  LineTouchData lineTouchData() => LineTouchData(
         handleBuiltInTouches: true,
         touchTooltipData: LineTouchTooltipData(
             fitInsideHorizontally: true,
-            tooltipMargin: size.height * 0.1,
-            maxContentWidth: size.width * 0.4,
+            tooltipMargin: 15.h,
+            maxContentWidth: 300.w,
             tooltipBgColor: azul.withOpacity(0.8),
             getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
               return touchedBarSpots.map((barSpot) {
@@ -455,7 +488,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
         ),
       );
 
-  FlTitlesData titlesData1(Size size) => FlTitlesData(
+  FlTitlesData titlesData1() => FlTitlesData(
         rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
@@ -463,25 +496,27 @@ class _ChartsScreenState extends State<ChartsScreen> {
           sideTitles: SideTitles(showTitles: false),
         ),
         leftTitles: AxisTitles(
-          sideTitles: leftTitles(size),
+          sideTitles: leftTitles(),
         ),
         bottomTitles: AxisTitles(
-          sideTitles: bottomTitles(size),
+          sideTitles: bottomTitles(),
         ),
       );
 
-  SideTitles leftTitles(Size size) => SideTitles(
+  SideTitles leftTitles() => SideTitles(
         getTitlesWidget: leftTitleWidgets,
         showTitles: true,
-        reservedSize: size.width * 0.1,
+        reservedSize: 50.w,
       );
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
-    Widget axisTitle = Text('${value.roundDecimals(4)}',
-        style: const TextStyle(
-          color: gris,
-        ),
-        textAlign: TextAlign.center);
+    Widget axisTitle = FittedBox(
+      child: Text('${value.roundDecimals(4)}',
+          style: const TextStyle(
+            color: gris,
+          ),
+          textAlign: TextAlign.center),
+    );
     if ((value == meta.max) || (value == meta.min)) {
       final remainder = value % meta.appliedInterval;
       if (remainder != 0.0 && remainder / meta.appliedInterval < 0.9) {
@@ -491,10 +526,10 @@ class _ChartsScreenState extends State<ChartsScreen> {
     return SideTitleWidget(axisSide: meta.axisSide, child: axisTitle);
   }
 
-  SideTitles bottomTitles(Size size) => SideTitles(
+  SideTitles bottomTitles() => SideTitles(
         getTitlesWidget: leftTitleWidgets,
         showTitles: true,
-        reservedSize: size.width * 0.1,
+        reservedSize: 0.h,
       );
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {

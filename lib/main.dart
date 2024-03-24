@@ -1,17 +1,26 @@
+// Dependencias de flutter
+// ignore: unused_import
+import 'dart:developer' as dev;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:acb/components/connector.dart';
-import 'package:acb/components/constants.dart';
-import 'package:acb/components/system.dart';
+// Dependencias externas
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:acb/screens/actions/actions.dart';
-import 'package:acb/screens/charts/charts.dart';
-import 'package:acb/screens/config/config.dart';
-import 'package:acb/screens/connect/connect.dart';
-import 'package:acb/screens/crop/crop.dart';
-import 'package:acb/screens/dashboard/dashboard.dart';
-import 'package:acb/screens/realtime/realtime.dart';
+// Otros archivo de codigo
+// -- Diversas funciones
+import 'package:agrocablebot/modules/connector/connector.dart';
+import 'package:agrocablebot/modules/system/system.dart';
+
+// -- Pantallas
+import 'package:agrocablebot/screens/actions/actions.dart';
+import 'package:agrocablebot/screens/charts/charts.dart';
+import 'package:agrocablebot/screens/configuration/configuration.dart';
+import 'package:agrocablebot/screens/connect/connect.dart';
+import 'package:agrocablebot/screens/dashboard/dashboard.dart';
+import 'package:agrocablebot/screens/realtime/realtime.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,154 +31,66 @@ void main() {
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: SystemUiOverlay.values);
-  runApp(const MyApp());
+  runApp(const Entrypoint());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class Entrypoint extends StatefulWidget {
+  const Entrypoint({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<Entrypoint> createState() => _EntrypointState();
 }
 
-class _MyAppState extends State<MyApp> {
-  int testing = 1;
+class _EntrypointState extends State<Entrypoint> {
+  bool loading = true;
 
-  Map<String, String> configs = {};
-  bool loaded = false;
-
-  late MQTT mqtt;
-
-  ThemeData darkTheme({required Size size}) {
-    return ThemeData(
-      appBarTheme: AppBarTheme(
-        color: dPrimaryColor,
-        centerTitle: true,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: dTextColor),
-        titleTextStyle: TextStyle(
-            fontSize: size.width < size.height
-                ? size.height * 0.04
-                : size.width * 0.06,
-            color: dTextColor),
-      ),
-      brightness: Brightness.dark,
-      primaryColor: dPrimaryColor,
-      scaffoldBackgroundColor: dBackgroundColor,
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: dTextColor),
-      ),
-    );
+  Future<bool> initConfig() async {
+    return await Configuration.init();
   }
 
-  ThemeData lightTheme({required Size size}) {
-    return ThemeData(
-      appBarTheme: AppBarTheme(
-        color: lPrimaryColor,
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: lTextColor),
-        titleTextStyle: TextStyle(
-            fontSize: size.width < size.height
-                ? size.height * 0.04
-                : size.width * 0.05,
-            color: lTextColor),
-        shadowColor: Colors.black,
-      ),
-      brightness: Brightness.light,
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor:
-              const MaterialStatePropertyAll<Color>(lElevatedColor),
-          minimumSize: MaterialStateProperty.all(
-            Size(
-              responsiveSize(size, size.width * 0.22, size.width * 0.1),
-              responsiveSize(size, size.height * 0.035, size.height * 0.05),
-            ),
-          ),
-          maximumSize: MaterialStateProperty.all(
-            Size(
-              responsiveSize(size, size.width * 0.22, size.width * 0.1),
-              responsiveSize(size, size.height * 0.035, size.height * 0.05),
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          shape: CircleBorder(), backgroundColor: lFLoatingColor),
-      primaryColor: lPrimaryColor,
-      scaffoldBackgroundColor: lBackgroundColor,
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        bodyMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        bodySmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        displayLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        displayMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        displaySmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        headlineLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        headlineMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        headlineSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        labelLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        labelMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        labelSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        titleLarge: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        titleMedium: TextStyle(color: lTextColor, fontFamily: 'Montserrat'),
-        titleSmall: TextStyle(color: lTextColor, fontFamily: 'Montserrat'), 
-      ),
-    );
-  }
-
-  configInit([bool connect = false]) async {
-    SqliteConn.configuration().then((value) {
-      for (var config in value) {
-        configs[config.title] = config.value;
-      }
-      setState(() {
-        if (configs.containsKey("ip")) {
-          mqtt.update(configs["ip"]!);
-        }
-        loaded = true;
-      });
-      mqtt.connect();
-    });
+  refresh() {
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    mqtt = MQTT();
-    configInit();
+    checkPermission();
   }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    if (!loaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return OrientationBuilder(builder: (context, orientation) {
-      changeRotation(orientation);
-      return MaterialApp(
-        initialRoute: '/realtime',
-        darkTheme: darkTheme(size: size),
-        routes: {
-          '/actions': (context) =>
-              ActionsScreen(mqtt: mqtt, configuration: configs),
-          '/config': (context) =>
-              ConfigScreen(configuration: configs, configInit: configInit),
-          '/charts': (context) => ChartsScreen(
-                configuration: configs,
-              ),
-          '/connect': (context) =>
-              ConnectScreen(mqtt: mqtt, configInit: configInit),
-          '/crop': (context) => CropScreen(mqtt: mqtt, configuration: configs),
-          '/dashboard': (context) =>
-              DashboardScreen(configuration: configs, mqtt: mqtt),
-          '/realtime': (context) =>
-              RealTimeScreen(mqtt: mqtt, configuration: configs),
-        },
-        theme: lightTheme(size: size),
-        themeMode: ThemeMode.light,
-      );
-    });
+    return FutureBuilder(
+      future: initConfig(),
+      builder: (context, snapshot) {
+        if (!(snapshot.hasData)) {
+          return const CircularProgressIndicator();
+        }
+        return ScreenUtilInit(
+          designSize: const Size(600, 1024),
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) => MaterialApp(
+            builder: (context, screen) => MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: const TextScaler.linear(1.0)),
+                child: screen!),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            initialRoute: '/actions',
+            routes: {
+              '/actions': (context) => const ActionsScreen(),
+              '/charts': (context) => const ChartScreen(),
+              '/configuration': (context) => const ConfigurationScreen(),
+              '/connect': (context) => ConnectScreen(update: refresh),
+              '/dashboard': (context) => const DashboardScreen(),
+              '/realtime': (context) => const RealtimeScreen(),
+            },
+            theme: lightTheme(),
+            themeMode: ThemeMode.light,
+          ),
+        );
+      },
+    );
   }
 }
